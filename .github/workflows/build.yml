@@ -384,3 +384,16 @@ jobs:
                           Button({
                               val k = kg.toFloatOrNull(); val r = reps.toFloatOrNull()?.toInt()
                               if (ex.isNotBlank() && k != null && r != null) { vm.addSet(ex.t
+                              
+      - name: Build VYRO APK
+        run: |
+          cd proj
+          gradle assembleDebug
+
+      - name: Upload VYRO APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VYRO-Android
+          path: proj/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
