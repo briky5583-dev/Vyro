@@ -466,5 +466,96 @@ jobs:
                               Text("Add food")
                           }
                       }
-                
+                  }
+                  item { Text("Today's food", fontWeight = FontWeight.Bold) }
+                  items(foods) { food ->
+                      VYROCard {
+                          Text(food.name, fontWeight = FontWeight.Bold)
+                          Text("${food.calories} kcal")
+                      }
+                  }
+              }
+
+              if (showDialog) {
+                  AlertDialog(
+                      onDismissRequest = { showDialog = false },
+                      title = { Text("Check your entry") },
+                      text = { Text("Enter a food name and a valid calorie number.") },
+                      confirmButton = {
+                          TextButton(onClick = { showDialog = false }) { Text("OK") }
+                      }
+                  )
+              }
+          }
+
+          @Composable
+          private fun CoachScreen() {
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  ScreenTitle("AI Coach", "Your future VYRO training assistant.")
+                  VYROCard {
+                      Text("AI coaching is not connected yet.", fontWeight = FontWeight.Bold)
+                      Text("This first version includes the app interface. An AI service can be connected in a later version.")
+                  }
+              }
+          }
+
+          @Composable
+          private fun ProfileScreen(
+              bodyWeight: String,
+              onSaveWeight: (String) -> Unit
+          ) {
+              var weightInput by remember { mutableStateOf("") }
+              var saved by remember { mutableStateOf(false) }
+
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  ScreenTitle("Profile", "Your personal fitness profile.")
+                  VYROCard {
+                      Text("Name", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                      Text("My profile", fontWeight = FontWeight.Bold)
+                      Text("Current recorded weight: $bodyWeight ${if (bodyWeight == "—") "" else "kg"}")
+                      OutlinedTextField(
+                          value = weightInput,
+                          onValueChange = { weightInput = it },
+                          label = { Text("Weight (kg)") },
+                          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                          modifier = Modifier.fillMaxWidth()
+                      )
+                      Button(
+                          onClick = {
+                              if (weightInput.toFloatOrNull() != null) {
+                                  onSaveWeight(weightInput.trim())
+                                  weightInput = ""
+                                  saved = true
+                              }
+                          },
+                          modifier = Modifier.fillMaxWidth()
+                      ) {
+                          Text("Save weight")
+                      }
+                      if (saved) {
+                          Text("Weight updated.")
+                      }
+                  }
+                  Text(
+                      "VYRO 1.0 · This starter version stores entries only while the app remains open.",
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      style = MaterialTheme.typography.bodySmall
+                  )
+              }
+          }
+          EOF
+
+      - name: Build debug APK
+        run: |
+          cd proj
+          gradle --no-daemon assembleDebug
+
+      - name: Upload VYRO APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VYRO-Android
+          path: proj/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
                 
